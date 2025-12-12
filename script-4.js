@@ -313,6 +313,35 @@ window.addEventListener('click', () => {
     else if (audioCtx.state === 'suspended') audioCtx.resume();
 });
 
+// Mobile tap to switch levels
+let touchStartTime = 0;
+canvas.addEventListener('touchstart', (e) => {
+    touchStartTime = Date.now();
+});
+
+canvas.addEventListener('touchend', (e) => {
+    const touchDuration = Date.now() - touchStartTime;
+    // Only switch levels on quick tap (< 300ms), not on long press or scroll
+    if (touchDuration < 300) {
+        if (!audioCtx) {
+            initAudio();
+            return;
+        }
+
+        const descriptions = [
+            "Level 0: Direct Threshold",
+            "Level 1: Opacity",
+            "Level 2: Smoothed Threshold",
+            "Level 3: Probabilistic",
+            "Level 4: Entropy Scatter",
+            "Level 5: Expression Grammar"
+        ];
+
+        currentLevel = (currentLevel + 1) % 6;
+        info.textContent = descriptions[currentLevel];
+    }
+});
+
 window.addEventListener('keydown', (e) => {
     const descriptions = [
         "Level 0: Direct Threshold",
