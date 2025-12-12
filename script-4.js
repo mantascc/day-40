@@ -315,14 +315,24 @@ window.addEventListener('click', () => {
 
 // Mobile tap to switch levels
 let touchStartTime = 0;
-canvas.addEventListener('touchstart', (e) => {
-    touchStartTime = Date.now();
-});
+let touchStartPos = { x: 0, y: 0 };
 
-canvas.addEventListener('touchend', (e) => {
+document.addEventListener('touchstart', (e) => {
+    touchStartTime = Date.now();
+    touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+
+document.addEventListener('touchend', (e) => {
     const touchDuration = Date.now() - touchStartTime;
-    // Only switch levels on quick tap (< 300ms), not on long press or scroll
-    if (touchDuration < 300) {
+    const touch = e.changedTouches[0];
+    const dx = Math.abs(touch.clientX - touchStartPos.x);
+    const dy = Math.abs(touch.clientY - touchStartPos.y);
+
+    // Only switch levels on quick tap (< 300ms) with minimal movement (< 20px)
+    if (touchDuration < 300 && dx < 20 && dy < 20) {
+        // Don't trigger on UI elements
+        if (e.target.id === 'fab' || e.target.closest('#paramPanel')) return;
+
         if (!audioCtx) {
             initAudio();
             return;
